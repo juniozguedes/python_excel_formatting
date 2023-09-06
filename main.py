@@ -78,7 +78,7 @@ def df_to_dict(data, start_date, end_date):
     return site_data
 
 
-def read_excel_extract_dates(filename: str):
+def read_excel_extract_dates(filename: str) -> DocumentResponse:
     # Read Excel and extract data
     data_frame = pd.read_excel(filename, header=None)
 
