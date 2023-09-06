@@ -57,7 +57,6 @@ def df_to_dict(data, start_date, end_date):
             if isinstance(value, (int, float)):
                 if math.isnan(value):
                     continue
-                # Only append data values if the value above in the same column is in "Date" list
                 if column in site_data[current_site]:
                     # Get the index of the current column
                     current_column_index = row.index.get_loc(column)
