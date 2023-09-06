@@ -2,6 +2,8 @@ import pandas as pd
 import datetime
 import math
 
+from schemas import DocumentResponse
+
 
 def format_excel_headers(data):
     # Shift the contents of Column A up by one row
@@ -76,19 +78,31 @@ def df_to_dict(data, start_date, end_date):
     return site_data
 
 
-def setup():
-    # Read the Excel file without a header
-    data = pd.read_excel("Analytics Template for Exercise.xlsx", header=None)
+def read_excel_extract_dates(filename: str):
+    # Read Excel and extract data
+    data_frame = pd.read_excel(filename, header=None)
 
     # Extract data from A1 and A2
-    start_date = data.iloc[0, 0]
-    end_date = data.iloc[1, 0]
+    start_date = data_frame.iloc[0, 0]
+    end_date = data_frame.iloc[1, 0]
+    return DocumentResponse(
+        data_frame=data_frame, start_date=start_date, end_date=end_date
+    )
+
+
+def setup():
+    # Read Excel and extract input dates
+    document_response = read_excel_extract_dates("Analytics Template for Exercise.xlsx")
 
     # Fix excel header format
-    data = format_excel_headers(data)
+    formatted_data = format_excel_headers(document_response.data_frame)
 
     # Format current df to proper dict to conversion
-    formatted_dict = df_to_dict(data, start_date, end_date)
+    formatted_dict = df_to_dict(
+        formatted_data,
+        document_response.start_date,
+        document_response.end_date,
+    )
 
     return formatted_dict
 
