@@ -18,16 +18,7 @@ def format_excel_headers(data):
     return data
 
 
-def setup():
-    # Read the Excel file without a header
-    data = pd.read_excel("Analytics Template for Exercise.xlsx", header=None)
-
-    # Extract data from A1 and A2
-    start_date = data.iloc[0, 0]
-    end_date = data.iloc[1, 0]
-
-    # Fix excel format
-    data = format_excel_headers(data)
+def df_to_dict(data, start_date, end_date):
     # Extract header parameters dynamically from the second row
     headers = data.iloc[0, :].tolist()
 
@@ -83,16 +74,32 @@ def setup():
                     matching_dates = [date for date in date_list if date in value_above]
                     if matching_dates:
                         site_data[current_site][column].append(value)
-
     return site_data
+
+
+def setup():
+    # Read the Excel file without a header
+    data = pd.read_excel("Analytics Template for Exercise.xlsx", header=None)
+
+    # Extract data from A1 and A2
+    start_date = data.iloc[0, 0]
+    end_date = data.iloc[1, 0]
+
+    # Fix excel header format
+    data = format_excel_headers(data)
+
+    # Format current df to proper dict to conversion
+    formatted_dict = df_to_dict(data, start_date, end_date)
+
+    return formatted_dict
 
 
 if __name__ == "__main__":
     # Step 1: Process Excel data and build site_data dictionary
-    site_data = setup()
+    formatted_dict = setup()
 
     # Step 2: Iterate through the dictionary to calculate Site ID counts
-    for site, info in site_data.items():
+    for site, info in formatted_dict.items():
         site_id = "site " + site.split()[1]  # Extract the site ID from the site name
         num_dates = len(info["Date"])
         site_ids = [site_id] * num_dates  # Create a list of site IDs
@@ -100,7 +107,7 @@ if __name__ == "__main__":
 
     # Step 3: Create a new DataFrame in sequence
     result_df = pd.DataFrame()
-    for site, data in site_data.items():
+    for site, data in formatted_dict.items():
         site_df = pd.DataFrame(data)
         result_df = pd.concat([result_df, site_df])
 
