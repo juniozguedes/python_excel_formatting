@@ -28,6 +28,16 @@ def setup():
 
     # Fix excel format
     data = format_excel_headers(data)
+    # Extract header parameters dynamically from the second row
+    headers = data.iloc[0, :].tolist()
+
+    # Initialize an empty set to store unique items
+    unique_items = set()
+    # Use a list comprehension to filter out duplicates while preserving order
+    result_list = [
+        x for x in headers if x not in unique_items and not unique_items.add(x)
+    ]
+    headers = ["Day of the month", "Date"] + result_list
     site_data = {}
     current_site = None
     for index, row in data.iterrows():
@@ -39,16 +49,8 @@ def setup():
                 break
             elif isinstance(value, str) and value.startswith("site"):
                 current_site = value
-                site_data[current_site] = {
-                    "Day of the month": [],
-                    "Date": [],
-                    "Site ID": [],
-                    "Page Views": [],
-                    "Unique Visitors": [],
-                    "Total Time Spent": [],
-                    "Visits": [],
-                    "Average Time Spent on Site": [],
-                }
+                # Initialize the site_data dictionary with dynamically extracted headers
+                site_data[current_site] = {header: [] for header in headers}
                 continue
 
             if isinstance(value, datetime.datetime):
@@ -88,6 +90,7 @@ def setup():
 if __name__ == "__main__":
     # Step 1: Process Excel data and build site_data dictionary
     site_data = setup()
+
     # Step 2: Iterate through the dictionary to calculate Site ID counts
     for site, info in site_data.items():
         site_id = "site " + site.split()[1]  # Extract the site ID from the site name
@@ -96,7 +99,6 @@ if __name__ == "__main__":
         info["Site ID"] = site_ids  # Update the "site ID" key with the list
 
     # Step 3: Create a new DataFrame in sequence
-    breakpoint()
     result_df = pd.DataFrame()
     for site, data in site_data.items():
         site_df = pd.DataFrame(data)
